@@ -4,13 +4,18 @@ import Foundation
 import MapKit
 
 
-class PinAnnotation: MKPointAnnotation {
-    
+class PinAnnotation: NSObject, MKAnnotation {
     var pin: Pin
+    
+    dynamic var coordinate: CLLocationCoordinate2D {
+        didSet {
+            pin.longitude = coordinate.longitude
+            pin.latitude = coordinate.latitude
+        }
+    }
     
     init(pin: Pin) {
         self.pin = pin
-        super.init()
         
         let coordinate = CLLocationCoordinate2D(
             latitude: pin.latitude,

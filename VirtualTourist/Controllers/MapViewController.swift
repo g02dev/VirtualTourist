@@ -13,6 +13,8 @@ class MapViewController: UIViewController {
     
     
     // MARK: - Variables and Constants
+    private var newPinAnnotation: PinAnnotation?
+    
     private var pins: [Pin] = []
     
     private lazy var dataController: DataController = {
@@ -91,18 +93,36 @@ class MapViewController: UIViewController {
     // MARK: - Gesture
     
     @objc func handleLongPressGesture(sender: UIGestureRecognizer) {
-        if sender.state == .began {
-            let locationInView = sender.location(in: mapView)
-            let locationInMap = mapView.convert(locationInView, toCoordinateFrom: mapView)
-            
+        let locationInView = sender.location(in: mapView)
+        let locationInMap = mapView.convert(locationInView, toCoordinateFrom: mapView)
+        
+        switch sender.state {
+        case .began:
             let pin = Pin(context: dataController.viewContext)
             pin.latitude = locationInMap.latitude
             pin.longitude = locationInMap.longitude
-            try? dataController.viewContext.save()
             
             let annotation = PinAnnotation(pin: pin)
             mapView.addAnnotation(annotation)
-            mapView.selectAnnotation(annotation, animated: false)
+            newPinAnnotation = annotation
+        case .changed:
+            newPinAnnotation?.coordinate = locationInMap
+        case .ended:
+            if let newPinAnnotation = newPinAnnotation {
+                newPinAnnotation.coordinate = locationInMap
+                mapView.selectAnnotation(newPinAnnotation, animated: false)
+            }
+            try? dataController.viewContext.save()
+        case .failed, .cancelled:
+            if let newPinAnnotation = newPinAnnotation {
+                mapView.removeAnnotation(newPinAnnotation)
+                
+                let pin = newPinAnnotation.pin
+                dataController.viewContext.delete(pin)
+            }
+            newPinAnnotation = nil
+        default:
+            break
         }
     }
     

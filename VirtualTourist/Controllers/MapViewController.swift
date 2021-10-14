@@ -14,9 +14,7 @@ class MapViewController: UIViewController {
     
     // MARK: - Variables and Constants
     private var newPinAnnotation: PinAnnotation?
-    
-    private var pins: [Pin] = []
-    
+        
     private lazy var dataController: DataController = {
         let appDelegate = UIApplication.shared.delegate as! AppDelegate
         return appDelegate.dataController
@@ -28,41 +26,43 @@ class MapViewController: UIViewController {
     override func viewDidLoad() {
         super.viewDidLoad()
         
-        loadPins()
-        
         mapView.delegate = self
         mapView.register(MKPinAnnotationView.self, forAnnotationViewWithReuseIdentifier: Constants.ReuseIds.pinAnnotationView)
         
         let longPressGestureRecognizer = UILongPressGestureRecognizer(target: self, action: #selector(handleLongPressGesture(sender:)))
-        mapView.addGestureRecognizer(longPressGestureRecognizer)
-        
-        addMapAnnotations()
-        setMapRegion()
+        mapView.addGestureRecognizer(longPressGestureRecognizer)        
     }
     
     override func viewWillAppear(_ animated: Bool) {
         super.viewWillAppear(animated)
         navigationController?.setNavigationBarHidden(true, animated: false)
-    }
-    
-    
-    // MARK: - Pins
-    
-    private func loadPins() {
-        let fetchRequest: NSFetchRequest<Pin> = Pin.fetchRequest()
-        let sortDescriptor = NSSortDescriptor(key: "creationDate", ascending: false)
-        fetchRequest.sortDescriptors = [sortDescriptor]
-        if let result = try? dataController.viewContext.fetch(fetchRequest) {
-            pins = result
-        } else {
-            pins = []
-        }
+        
+        showPinsOnTheMap()
     }
     
     
     // MARK: - Map
     
-    private func addMapAnnotations() {
+    private func showPinsOnTheMap() {
+        let pins = loadPins()
+        addMapAnnotations(pins)
+        setMapRegion(pins)
+    }
+    
+    private func loadPins() -> [Pin] {
+        let fetchRequest: NSFetchRequest<Pin> = Pin.fetchRequest()
+        let sortDescriptor = NSSortDescriptor(key: "creationDate", ascending: false)
+        fetchRequest.sortDescriptors = [sortDescriptor]
+        if let result = try? dataController.viewContext.fetch(fetchRequest) {
+            return result
+        } else {
+            return []
+        }
+    }
+    
+    private func addMapAnnotations(_ pins: [Pin]) {
+        mapView.removeAnnotations(mapView.annotations)
+        
         var annotations: [PinAnnotation] = []
         
         for pin in pins {
@@ -72,7 +72,7 @@ class MapViewController: UIViewController {
         mapView.addAnnotations(annotations)
     }
     
-    private func setMapRegion() {
+    private func setMapRegion(_ pins: [Pin]) {
         guard pins.count > 0 else { return }
         
         let pin = pins[0]

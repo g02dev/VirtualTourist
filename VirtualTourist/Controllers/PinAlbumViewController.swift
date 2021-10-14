@@ -17,6 +17,11 @@ class PinAlbumViewController: UIViewController {
         reloadPhotos()
     }
     
+    @IBAction func deletePin(_ sender: UIBarButtonItem) {
+        dataController.viewContext.delete(pin)
+        try? dataController.viewContext.saveIfNeeded()
+        navigationController?.popViewController(animated: true)
+    }
     
     // MARK: - Variables and Constants
 

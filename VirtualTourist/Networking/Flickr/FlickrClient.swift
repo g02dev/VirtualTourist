@@ -6,7 +6,7 @@ import Foundation
 class FlickrClient {
     
     #warning("Set valid apiKey. Test https://www.flickr.com/services/api/explore/flickr.test.echo")
-    private let apiKey = "f128e818820986014fcbbb5a4bf1ac86"
+    private let apiKey = "b9c4901737e615d106358214457478a3"
     private let urlBase = "https://www.flickr.com/services/rest/"
     // https://www.flickr.com/services/api/explore/flickr.photos.search
     
@@ -24,7 +24,8 @@ class FlickrClient {
             .init(name: "lat", value: String(latitude)),
             .init(name: "lon", value: String(longitude)),
             .init(name: "page", value: "1"),
-            .init(name: "per_page", value: String(perPage))
+            .init(name: "per_page", value: String(perPage)),
+            .init(name: "extras", value: "url_m") // url_sq, url_t, url_s, url_q, url_m, url_n, url_z, url_c, url_l, url_o
         ]
         return components.url
     }

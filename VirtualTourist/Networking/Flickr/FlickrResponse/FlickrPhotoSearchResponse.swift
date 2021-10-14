@@ -14,15 +14,12 @@ struct FlickrPhotoSearchResponse: Codable {
     }
     
     struct PhotoResponse: Codable {
-        let id: String
-        let owner: String
-        let secret: String
-        let server: String
-        let farm: Int
         let title: String
+        let url: URL
         
-        var url: URL {
-            return URL(string: "https://farm\(farm).staticflickr.com/\(server)/\(id)_\(secret)_m.jpg")!
+        enum CodingKeys: String, CodingKey {
+            case title
+            case url = "url_m"
         }
     }
     
